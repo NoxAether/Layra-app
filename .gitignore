@@ -5,3 +5,5 @@ tmp/
 
 
 compile_commands.json
+*.o
+Lyra

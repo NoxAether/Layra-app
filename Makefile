@@ -1,33 +1,51 @@
 ##
 # Lyra
-#
 # @file
-# @version 0.1
+# @version 0.2
+##
 
+# Compiler and flags
 CCX = g++
 CCXFLAGS = -std=c++23 -O3 -Wall -flto $(shell fltk-config --cxxflags)
 LDFLAGS = $(shell fltk-config --ldflags)
 
+# Project
 PROJECT = Lyra
-SRC = $(wildcard src/*.cpp)
-OBJ = $(SRC:.cpp=.o)
 
+# Source files
+SRC := $(wildcard src/*.cpp) \
+       $(wildcard src/screens/*.cpp) \
+       $(wildcard src/utils/*.cpp)
+
+# Object files
+OBJ := $(SRC:.cpp=.o)
+
+# Default target
+all: $(PROJECT)
+
+# Link
 $(PROJECT): $(OBJ)
-	@$(CCX) $(OBJ) -o $(PROJECT) $(LDFLAGS)
-	@echo "Compilation finished"
+	@echo "Linking..."
+	$(CCX) $(OBJ) -o $(PROJECT) $(LDFLAGS)
+	@echo "Build finished."
 
-src/%.o: src/%.cpp
-	@$(CCX) $(CCXFLAGS) -c $< -o $@
+# Compile .cpp -> .o
+%.o: %.cpp
+	@echo "Compiling $< ..."
+	$(CCX) $(CCXFLAGS) -c $< -o $@
 
-run:
-	@echo "Running"
-	@./$(PROJECT)
-	@echo "Finished Running"
+# Run the program
+run: $(PROJECT)
+	@echo "Running $(PROJECT)..."
+	./$(PROJECT)
+	@echo "Finished."
 
+# Clean up
 clean:
 	@rm -f $(OBJ) $(PROJECT)
-	@echo "Done"
+	@echo "Cleaned."
 
+# Setup FLTK
 setup:
 	@which fltk-config >/dev/null 2>&1 || $(MAKE) _detect_install
 	@echo "FLTK already installed, skipping setup."
@@ -36,14 +54,12 @@ _detect_install:
 ifeq ($(shell [ -f /etc/debian_version ] && echo deb),deb)
 	@echo "Installing FLTK on Debian/Ubuntu..."
 	sudo apt update
-	sudo apt install libfltk1.3-dev
+	sudo apt install -y libfltk1.3-dev
 else
 ifeq ($(shell [ -f /etc/arch-release ] && echo arch),arch)
 	@echo "Installing FLTK on Arch/Manjaro..."
-	sudo pacman -Syu fltk
+	sudo pacman -Syu fltk --noconfirm
 else
 	@echo "Unsupported system. Please install FLTK manually :("
 endif
 endif
-
-# end
